@@ -1,0 +1,52 @@
+/* Importando uma fonte moderna e limpa (Inter) */
+@import url('https://googleapis.com');
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f4f7f6 0%, #e9f0ee 100%) !important;
+    color: #333d47;
+}
+
+/* Deixando o Card com visual Premium (Efeito Flutuante) */
+.card {
+    background: #ffffff !important;
+    box-shadow: 0 10px 30px rgba(162, 182, 176, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    transition: transform 0.2s ease;
+}
+
+/* Estilizando o Botão Principal (Azul Saúde Elegante) */
+.btn-primary {
+    background-color: #0d6efd !important;
+    border: none !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease !important;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3) !important;
+}
+
+/* Ajustando as caixas de digitação do formulário */
+.form-control {
+    border: 1px solid #ced4da !important;
+    background-color: #fcfdfe !important;
+    font-size: 0.95rem !important;
+    color: #495057 !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.form-control:focus {
+    background-color: #fff !important;
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+}
+
+/* Ajuste fino na imagem da logo para não distorcer */
+img {
+    object-fit: contain;
+    max-width: 100%;
+}

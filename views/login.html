@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestão Financeira da Saúde</title>
+    <!-- Link do CSS do Bootstrap -->
+    <link href="https://jsdelivr.net" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light d-flex align-items-center vh-100">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                
+                <!-- Card do Formulário de Login -->
+                <div class="card shadow-lg border-0 rounded-4 p-4 bg-white">
+                    
+                    <!-- Logo menor para dar espaço ao formulário -->
+                    <div class="text-center mb-4">
+                        <img src="/img/logo-secretaria.png" alt="Secretaria de Saúde" class="img-fluid" style="max-height: 80px;">
+                        <h5 class="fw-bold text-secondary mt-3mb-0">Acesso ao Sistema</h5>
+                    </div>
+
+                    <!-- Formulário que enviará os dados para o back-end futuramente -->
+                    <form action="/login" method="POST">
+                        
+                        <!-- Campo de Usuário -->
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-muted small fw-bold">USUÁRIO / E-MAIL</label>
+                            <input type="text" class="form-control form-control-lg rounded-3" id="username" name="username" placeholder="Digite seu usuário" required>
+                        </div>
+
+                        <!-- Campo de Senha -->
+                        <div class="mb-4">
+                            <label for="password" class="form-label text-muted small fw-bold">SENHA</label>
+                            <input type="password" class="form-control form-control-lg rounded-3" id="password" name="password" placeholder="Digite sua senha" required>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold py-2 shadow-sm">
+                                ACESSAR
+                            </button>
+                            <a href="/" class="btn btn-link btn-sm text-decoration-none text-muted mt-2">
+                                Voltar para o início
+                            </a>
+                        </div>
+
+                    </form>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script src="https://jsdelivr.net"></script>
+</body>
+</html>

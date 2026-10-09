@@ -10,13 +10,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// =========================================================================
-// CORREÇÃO DO BOOTSTRAP: Servindo as pastas oficiais de CSS e JS locais
-// =========================================================================
-app.use('/css/bootstrap.min.css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css/bootstrap.min.css')));
-app.use('/js/bootstrap.bundle.min.js', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')));
-
-// Servir os arquivos estáticos da prefeitura (Sua Logo PNG e estilos extras)
+// Servir os arquivos estáticos da prefeitura (Sua Logo PNG e o style.css)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ROTAS DO SISTEMA (Navegação de Telas)

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lançar Valores - Gestão Orçamentária da Saúde</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+    <!-- 🔝 TOPO FIXO (LOGO E SELETOR TEMPORAL) -->
+    <header class="topo-sistema">
+        <div class="logo-container">
+            <img src="imagens/logo-saude.png" alt="Logo Secretaria da Saúde" class="logo-saude" onerror="this.src='https://placehold.co'">
+            <h1 class="titulo-topo">Secretaria Municipal de Saúde</h1>
+        </div>
+        <div class="seletor-ano-container">
+            <label class="label-ano" for="filtro-ano">Exercício:</label>
+            <select id="filtro-ano" class="select-ano-grande" onchange="atualizarRodapeSaude()">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="corpo-sistema">
+        <!-- 🧱 MENU LATERAL ESQUERDO FIXO -->
+        <nav class="menu-lateral">
+            <button class="btn-menu" onclick="window.location.href='index.html'">🏠 Painel Geral</button>
+            <button class="btn-menu" onclick="window.location.href='fontes.html'">➕ Nova Fonte / Ficha</button>
+            <button class="btn-menu ativo" onclick="window.location.href='lancamentos.html'">💸 Lançar Valores</button>
+            <button class="btn-menu" onclick="window.location.href='relatorios.html'">📊 Relatórios</button>
+            <button class="btn-menu" style="margin-top: auto; color: #ef4444;" onclick="logout()">🚪 Sair</button>
+        </nav>
+
+        <!-- 🏢 ÁREA DE CONTEÚDO CENTRAL GIGANTE -->
+        <main class="conteudo-central">
+            <h2 class="titulo-pagina">Ficha de Movimentação de Recursos</h2>
+
+            <!-- Alertas de feedback -->
+            <div id="mensagem-sucesso" style="display:none; background-color:#d1e7dd; color:#0f5132; padding:20px; border-radius:12px; font-size:1.3rem; font-weight:700; margin-bottom:25px; border:2px solid #badbcc;"></div>
+            <div id="mensagem-erro" style="display:none; background-color:#f8d7da; color:#842029; padding:20px; border-radius:12px; font-size:1.3rem; font-weight:700; margin-bottom:25px; border:2px solid #f5c2c7;"></div>
+
+            <div class="ficha-formulario">
+                <form id="form-movimentacao" onsubmit="salvarLancamento(event)">
+                    
+                    <!-- Passo 1: Selecionar Fonte -->
+                    <div class="grupo-campo">
+                        <label for="selecao-fonte">Selecione a Fonte de Recurso</label>
+                        <select id="selecao-fonte" class="select-grande" required>
+                            <option value="">Carregando fontes do banco...</option>
+                        </select>
+                    </div>
+
+                    <!-- Passo 2: Escolha da Realidade -->
+                    <div class="grupo-campo">
+                        <label style="margin-bottom: 5px;">Qual a Realidade do Fluxo?</label>
+                        <div class="container-gangorra">
+                            <button type="button" class="btn-gangorra" onclick="selecionarGangorra(this, 'tipo_fluxo', 'Orçamentário')">📑 Orçamentário (Direito de Gasto)</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarGangorra(this, 'tipo_fluxo', 'Financeiro (Conta Real)')">🏦 Conta Real (Dinheiro no Banco)</button>
+                        </div>
+                        <input type="hidden" id="tipo_fluxo" required>
+                    </div>
+                    <!-- Passo 3: Tipo de Movimento -->
+                    <div class="grupo-campo">
+                        <label style="margin-bottom: 5px;">Tipo de Movimento</label>
+                        <div class="container-gangorra">
+                            <button type="button" class="btn-gangorra" style="border-color:#10b981;" onclick="selecionarGangorra(this, 'tipo_movimento', 'Entrada'); alternarEstagios(false)">🟢 Entrada ( + )</button>
+                            <button type="button" class="btn-gangorra" style="border-color:#ef4444;" onclick="selecionarGangorra(this, 'tipo_movimento', 'Saída'); alternarEstagios(true)">🔴 Saída ( - )</button>
+                        </div>
+                        <input type="hidden" id="tipo_movimento" required>
+                    </div>
+
+                    <!-- Passo 4: Estágio da Despesa Pública (Exclusivo para Saídas) -->
+                    <div id="secao-estagios" class="grupo-campo" style="display: none;">
+                        <label style="margin-bottom: 5px;">Estágio da Despesa Pública</label>
+                        <div class="container-gangorra">
+                            <button type="button" class="btn-gangorra" onclick="selecionarGangorra(this, 'estagio_despesa', 'Empenho')">1. Empenho (Reservar)</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarGangorra(this, 'estagio_despesa', 'Liquidação')">2. Liquidação (NF Entregue)</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarGangorra(this, 'estagio_despesa', 'Pagamento')">3. Pagamento (Saída Real)</button>
+                        </div>
+                        <input type="hidden" id="estagio_despesa" value="Nenhum">
+                    </div>
+
+                    <!-- Passo 5: Valores e Histórico -->
+                    <div class="grupo-campo">
+                        <label for="valor-lancamento">Valor do Lançamento (R\$)</label>
+                        <input type="number" step="0.01" id="valor-lancamento" class="input-grande" placeholder="0,00" style="font-size: 2.2rem; font-weight: bold; color: #1e293b;" required>
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="descricao-lancamento">Histórico / Descrição da Movimentação</label>
+                        <input type="text" id="descricao-lancamento" class="input-grande" placeholder="Ex: Repasse Federal Bloco Custeio SUS, Compra de Medicamentos" required>
+                    </div>
+
+                    <button type="submit" class="btn-principal-gigante" style="margin-top: 20px; background-color: #3b82f6;">
+                        🚀 CONFIRMAR E LANÇAR VALOR
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- 🟢🟡🔴 RODAPÉ DE DIAGNÓSTICO FIXO -->
+    <footer id="rodape-status" class="rodape-saude status-verde">
+        <div id="diagnostico-mensagem" class="texto-diagnostico">Carregando dados da saúde financeira...</div>
+        <div class="valores-rodape">
+            <div class="item-valor-rodape">📑 Orçamento Total: <span id="rodape-orcamento" class="numero">R\$ 0,00</span></div>
+            <div class="item-valor-rodape">🏦 Caixa Real: <span id="rodape-caixa" class="numero">R\$ 0,00</span></div>
+        </div>
+    </footer>
+
+    <script>
+        const token = localStorage.getItem('token_saude');
+        if (!token) window.location.href = 'login.html';
+
+        const nivelUsuario = localStorage.getItem('usuario_nivel');
+        if (nivelUsuario === 'Visualizador') {
+            document.querySelector('.ficha-formulario').innerHTML = `<div style="font-size:1.6rem; font-weight:700; color:#ef4444;">⚠️ ACESSO NEGADO: Seu perfil possui apenas permissão de leitura de relatórios e auditoria visual.</div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarFontesNoSelect();
+            atualizarRodapeSaude();
+        });
+
+        async function carregarFontesNoSelect() {
+            const select = document.getElementById('selecao-fonte');
+            try {
+                const res = await fetch('/api/fontes/listar', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const fontes = await res.json();
+
+                if (fontes.length === 0) {
+                    select.innerHTML = '<option value="">Nenhuma fonte cadastrada no sistema</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">-- Escolha uma Fonte Oficial --</option>';
+                fontes.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.numero;
+                    opt.textContent = `Fonte ${f.numero} - ${f.nome} [${f.tipo}]`;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                select.innerHTML = '<option value="">Erro ao carregar fontes</option>';
+            }
+        }
+
+        function selecionarGangorra(botao, idInputOculto, valor) {
+            botao.parentElement.querySelectorAll('.btn-gangorra').forEach(btn => btn.classList.remove('selecionado'));
+            botao.classList.add('selecionado');
+            document.getElementById(idInputOculto).value = valor;
+        }
+
+        function alternarEstagios(mostrar) {
+            const secao = document.getElementById('secao-estagios');
+            const inputEstagio = document.getElementById('estagio_despesa');
+            if (mostrar) {
+                secao.style.display = 'flex';
+                inputEstagio.value = '';
+            } else {
+                secao.style.display = 'none';
+                inputEstagio.value = 'Nenhum';
+                secao.querySelectorAll('.btn-gangorra').forEach(btn => btn.classList.remove('selecionado'));
+            }
+        }
+
+        async function salvarLancamento(event) {
+            event.preventDefault();
+            const msgSucesso = document.getElementById('mensagem-sucesso');
+            const msgErro = document.getElementById('mensagem-erro');
+            
+            msgSucesso.style.display = 'none';
+            msgErro.style.display = 'none';
+
+            const payload = {
+                ano_exercicio: parseInt(document.getElementById('filtro-ano').value),
+                fonte_numero: parseInt(document.getElementById('selecao-fonte').value),
+                tipo_fluxo: document.getElementById('tipo_fluxo').value,
+                tipo_movimento: document.getElementById('tipo_movimento').value,
+                estagio_despesa: document.getElementById('estagio_despesa').value,
+                valor: document.getElementById('valor-lancamento').value,
+                descricao: document.getElementById('descricao-lancamento').value
+            };
+
+            if (!payload.tipo_fluxo || !payload.tipo_movimento || !payload.estagio_despesa) {
+                msgErro.textContent = "Erro na Ficha: Certifique-se de clicar em todas as opções grandes.";
+                msgErro.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/fontes/movimentar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const dados = await res.json();
+                if (!res.ok) throw new Error(dados.error);
+
+                msgSucesso.textContent = `Lançamento de ${payload.tipo_movimento} efetuado com sucesso!`;
+                msgSucesso.style.display = 'block';
+                
+                document.getElementById('valor-lancamento').value = '';
+                document.getElementById('descricao-lancamento').value = '';
+                document.getElementById('tipo_fluxo').value = '';
+                document.getElementById('tipo_movimento').value = '';
+                document.getElementById('estagio_despesa').value = 'Nenhum';
+                document.querySelectorAll('.btn-gangorra').forEach(btn => btn.classList.remove('selecionado'));
+                document.getElementById('secao-estagios').style.display = 'none';
+
+                atualizarRodapeSaude();
+
+            } catch (err) {
+                msgErro.textContent = err.message;
+                msgErro.style.display = 'block';
+            }
+        }
+
+        async function atualizarRodapeSaude() {
+            const ano = document.getElementById('filtro-ano').value;
+            try {
+                const res = await fetch(`/api/dashboard/saude?ano=${ano}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await res.json();
+                
+                document.getElementById('rodape-orcamento').textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dados.saldoOrcamentario);
+                document.getElementById('rodape-caixa').textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dados.saldoFinanceiro);
+                document.getElementById('diagnostico-mensagem').textContent = dados.mensagem;
+                document.getElementById('rodape-status').className = `rodape-saude status-${dados.statusSaude.toLowerCase()}`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios e Auditoria - Gestão da Saúde</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <style>
+        /* Estilos adicionais ultra-leves exclusivos para tabelas grandes de relatórios */
+        .painel-tabelas-comparativas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .coluna-relatorio {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            border-top: 6px solid #cbd5e1;
+        }
+        .coluna-relatorio.orcamento { border-top-color: #3b82f6; }
+        .coluna-relatorio.financeiro { border-top-color: #0d9488; }
+        
+        .titulo-coluna {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #1e293b;
+            text-transform: uppercase;
+        }
+        .tabela-grande {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.1rem;
+            text-align: left;
+        }
+        .tabela-grande th {
+            background-color: #f8fafc;
+            padding: 15px;
+            font-weight: 700;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tabela-grande td {
+            padding: 15px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+        .tabela-grande tr:hover {
+            background-color: #f8fafc;
+        }
+        .badge-estagio {
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 6px;
+            background-color: #e2e8f0;
+        }
+        .operador-nome {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            font-weight: 600;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🔝 TOPO FIXO (LOGO E SELETOR TEMPORAL) -->
+    <header class="topo-sistema">
+        <div class="logo-container">
+            <img src="imagens/logo-saude.png" alt="Logo Secretaria da Saúde" class="logo-saude" onerror="this.src='https://placehold.co'">
+            <h1 class="titulo-topo">Secretaria Municipal de Saúde</h1>
+        </div>
+        <div class="seletor-ano-container">
+            <label class="label-ano" for="filtro-ano">Exercício:</label>
+            <select id="filtro-ano" class="select-ano-grande" onchange="gerarRelatorioFiltrado()">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="corpo-sistema">
+        <!-- 🧱 MENU LATERAL ESQUERDO FIXO -->
+        <nav class="menu-lateral">
+            <button class="btn-menu" onclick="window.location.href='index.html'">🏠 Painel Geral</button>
+            <button class="btn-menu" onclick="window.location.href='fontes.html'">➕ Nova Fonte / Ficha</button>
+            <button class="btn-menu" onclick="window.location.href='lancamentos.html'">💸 Lançar Valores</button>
+            <button class="btn-menu ativo" onclick="window.location.href='relatorios.html'">📊 Relatórios</button>
+            <button class="btn-menu" style="margin-top: auto; color: #ef4444;" onclick="logout()">🚪 Sair</button>
+        </nav>
+
+        <!-- 🏢 ÁREA DE CONTEÚDO CENTRAL GIGANTE -->
+        <main class="conteudo-central">
+            <h2 class="titulo-pagina">Histórico e Relatório Detalhado</h2>
+
+            <!-- Barra superior de seleção da dotação -->
+            <div class="ficha-formulario" style="max-width: 100%; padding: 25px; margin-bottom: 25px; display: flex; gap: 20px; align-items: flex-end;">
+                <div class="grupo-campo" style="flex: 1; margin-bottom: 0;">
+                    <label for="selecao-fonte-relatorio">Filtrar por Fonte de Recurso</label>
+                    <select id="selecao-fonte-relatorio" class="select-grande" onchange="gerarRelatorioFiltrado()">
+                        <option value="">-- Selecione uma Fonte para Auditoria --</option>
+                    </select>
+                </div>
+                <button type="button" class="btn-principal-gigante" style="width: auto; height: 58px; padding: 0 30px; font-size: 1.2rem; background-color: #64748b;" onclick="window.print()">
+                    🖨️ IMPRIMIR RELATÓRIO
+                </button>
+            </div>
+
+            <!-- Espaço das Duas Colunas Lado a Lado (Orçamento vs Realidade Financeira) -->
+            <div class="painel-tabelas-comparativas">
+                
+                <!-- Coluna Esquerda: Movimentações do Planejamento (Orçamento) -->
+                <div class="coluna-relatorio orcamento">
+                    <h3 class="titulo-coluna">📑 Fluxo Orçamentário (Créditos e Reservas)</h3>
+                    <table class="tabela-grande">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Histórico / Descrição</th>
+                                <th>Estágio</th>
+                                <th>Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dados-tabela-orcamento">
+                            <tr><td colspan="4" style="color: #64748b;">Selecione uma fonte acima para gerar o extrato...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Coluna Direita: Movimentações Reais do Banco (Financeiro) -->
+                <div class="coluna-relatorio financeiro">
+                    <h3 class="titulo-coluna">🏦 Fluxo Financeiro (Caixa Real do Banco)</h3>
+                    <table class="tabela-grande">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Histórico / Descrição</th>
+                                <th>Movimento</th>
+                                <th>Valor (R$)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dados-tabela-financeiro">
+                            <tr><td colspan="4" style="color: #64748b;">Selecione uma fonte acima para gerar o extrato...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </main>
+    </div>
+    <!-- 🟢🟡🔴 RODAPÉ DE DIAGNÓSTICO FIXO -->
+    <footer id="rodape-status" class="rodape-saude status-verde">
+        <div id="diagnostico-mensagem" class="texto-diagnostico">Carregando dados da saúde financeira...</div>
+        <div class="valores-rodape">
+            <div class="item-valor-rodape">📑 Orçamento Total: <span id="rodape-orcamento" class="numero">R\$ 0,00</span></div>
+            <div class="item-valor-rodape">🏦 Caixa Real: <span id="rodape-caixa" class="numero">R\$ 0,00</span></div>
+        </div>
+    </footer>
+
+    <!-- LÓGICA DE PROCESSAMENTO ULTRA-RÁPIDA DO RELATÓRIO -->
+    <script>
+        const token = localStorage.getItem('token_saude');
+        if (!token) window.location.href = 'login.html';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarFontesFiltro();
+            atualizarRodapeSaude();
+        });
+
+        // Popula o campo de seleção com as fontes livres do banco
+        async function carregarFontesFiltro() {
+            const select = document.getElementById('selecao-fonte-relatorio');
+            try {
+                const res = await fetch('/api/fontes/listar', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const fontes = await res.json();
+                
+                fontes.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.numero;
+                    opt.textContent = `Fonte ${f.numero} - ${f.nome}`;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Busca o extrato unificado e divide nas duas colunas estipuladas
+        async function gerarRelatorioFiltrado() {
+            const ano = document.getElementById('filtro-ano').value;
+            const fonte = document.getElementById('selecao-fonte-relatorio').value;
+            
+            const tabelaOrcamento = document.getElementById('dados-tabela-orcamento');
+            const tabelaFinanceiro = document.getElementById('dados-tabela-financeiro');
+
+            if (!fonte) {
+                tabelaOrcamento.innerHTML = '<tr><td colspan="4" style="color: #64748b;">Selecione uma fonte acima para gerar o extrato...</td></tr>';
+                tabelaFinanceiro.innerHTML = '<tr><td colspan="4" style="color: #64748b;">Selecione uma fonte acima para gerar o extrato...</td></tr>';
+                atualizarRodapeSaude(); // Mantém o rodapé no total geral se nada for escolhido
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/fontes/relatorio?ano=${ano}&fonte=${fonte}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const lancamentos = await res.json();
+
+                tabelaOrcamento.innerHTML = '';
+                tabelaFinanceiro.innerHTML = '';
+
+                // Filtra de forma leve e rápida em memória do navegador
+                const itensOrcamento = lancamentos.filter(l => l.tipo_fluxo === 'Orçamentário');
+                const itensFinanceiro = lancamentos.filter(l => l.tipo_fluxo === 'Financeiro (Conta Real)');
+
+                // Alimenta a tabela do Orçamento (Esquerda)
+                if (itensOrcamento.length === 0) {
+                    tabelaOrcamento.innerHTML = '<tr><td colspan="4">Nenhuma movimentação orçamentária neste ano.</td></tr>';
+                } else {
+                    itensOrcamento.forEach(l => {
+                        const tr = document.createElement('tr');
+                        const corSinal = l.tipo_movimento === 'Entrada' ? 'color:#10b981; font-weight:bold;' : 'color:#ef4444;';
+                        const sinal = l.tipo_movimento === 'Entrada' ? '+' : '-';
+                        
+                        tr.innerHTML = `
+                            <td>${new Date(l.dataLancamento).toLocaleDateString('pt-BR')}</td>
+                            <td>${l.descricao}<span class="operador-nome">Por: ${l.usuario_id?.nome || 'Sistema'}</span></td>
+                            <td><span class="badge-estagio">${l.estagio_despesa}</span></td>
+                            <td style="${corSinal}">${sinal} ${formatarMoeda(l.valor)}</td>
+                        `;
+                        tabelaOrcamento.appendChild(tr);
+                    });
+                }
+
+                // Alimenta a tabela do Dinheiro Real (Direita)
+                if (itensFinanceiro.length === 0) {
+                    tabelaFinanceiro.innerHTML = '<tr><td colspan="4">Nenhuma movimentação financeira registrada na conta.</td></tr>';
+                } else {
+                    itensFinanceiro.forEach(l => {
+                        const tr = document.createElement('tr');
+                        const corSinal = l.tipo_movimento === 'Entrada' ? 'color:#10b981; font-weight:bold;' : 'color:#ef4444;';
+                        const sinal = l.tipo_movimento === 'Entrada' ? '+' : '-';
+                        
+                        tr.innerHTML = `
+                            <td>${new Date(l.dataLancamento).toLocaleDateString('pt-BR')}</td>
+                            <td>${l.descricao}<span class="operador-nome">Por: ${l.usuario_id?.nome || 'Sistema'}</span></td>
+                            <td><strong>${l.tipo_movimento}</strong></td>
+                            <td style="${corSinal}">${sinal} ${formatarMoeda(l.valor)}</td>
+                        `;
+                        tabelaFinanceiro.appendChild(tr);
+                    });
+                }
+
+                // Altera dinamicamente o rodapé fixo focado apenas na fonte selecionada
+                await atualizarRodapeSaude(fonte);
+
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Sincronização do rodapé (Geral ou focado por fonte)
+        async function atualizarRodapeSaude(fonteEspecifica = '') {
+            const ano = document.getElementById('filtro-ano').value;
+            let url = `/api/dashboard/saude?ano=${ano}`;
+            if (fonteEspecifica) url += `&fonte=${fonteEspecifica}`;
+
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await res.json();
+                
+                document.getElementById('rodape-orcamento').textContent = formatarMoeda(dados.saldoOrcamentario);
+                document.getElementById('rodape-caixa').textContent = formatarMoeda(dados.saldoFinanceiro);
+                document.getElementById('diagnostico-mensagem').textContent = dados.mensagem;
+                document.getElementById('rodape-status').className = `rodape-saude status-${dados.statusSaude.toLowerCase()}`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

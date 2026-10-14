@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Geral - Gestão Orçamentária da Saúde</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+    <!-- 🔝 TOPO FIXO (LOGO E SELETOR TEMPORAL) -->
+    <header class="topo-sistema">
+        <div class="logo-container">
+            <img src="imagens/logo-saude.png" alt="Logo Secretaria da Saúde" class="logo-saude" onerror="this.src='https://placehold.co'">
+            <h1 class="titulo-topo">Secretaria Municipal de Saúde</h1>
+        </div>
+        <div class="seletor-ano-container">
+            <label class="label-ano" for="filtro-ano">Exercício:</label>
+            <select id="filtro-ano" class="select-ano-grande" onchange="recarregarDadosPainel()">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="corpo-sistema">
+        <!-- 🧱 MENU LATERAL ESQUERDO FIXO -->
+        <nav class="menu-lateral">
+            <button class="btn-menu ativo" onclick="window.location.href='index.html'">🏠 Painel Geral</button>
+            <button class="btn-menu" onclick="window.location.href='fontes.html'">➕ Nova Fonte / Ficha</button>
+            <button class="btn-menu" onclick="window.location.href='lancamentos.html'">💸 Lançar Valores</button>
+            <button class="btn-menu" onclick="window.location.href='relatorios.html'">📊 Relatórios</button>
+            <button class="btn-menu" style="margin-top: auto; color: #ef4444;" onclick="logout()">🚪 Sair</button>
+        </nav>
+
+        <!-- 🏢 ÁREA DE CONTEÚDO CENTRAL GIGANTE -->
+        <main class="conteudo-central">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2 class="titulo-pagina">Painel de Saúde das Pastas</h2>
+                <div id="boas-vindas" style="font-size: 1.3rem; font-weight: 700; color: #64748b;"></div>
+            </div>
+
+            <!-- Espaço Dinâmico onde o JavaScript injetará os Cards Livres do Banco -->
+            <div id="grid-fontes" class="grid-dashboard">
+                <!-- Efeito Carregando Visual Leve -->
+                <div style="font-size: 1.8rem; font-weight: bold; color: #64748b;">Buscando informações financeiras do banco...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 🟢🟡🔴 RODAPÉ DE DIAGNÓSTICO FIXO DA SAÚDE FINANCEIRA -->
+    <footer id="rodape-status" class="rodape-saude status-verde">
+        <div id="diagnostico-mensagem" class="texto-diagnostico">
+            Carregando diagnóstico de saúde financeira...
+        </div>
+        <div class="valores-rodape">
+            <div class="item-valor-rodape">
+                📑 Orçamento Total: <span id="rodape-orcamento" class="numero">R\$ 0,00</span>
+            </div>
+            <div class="item-valor-rodape">
+                🏦 Caixa Real: <span id="rodape-caixa" class="numero">R\$ 0,00</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LOGICA SCRIPT VANILLA ULTRA-LEVE DE ATUALIZAÇÃO -->
+    <script>
+        // Trava de segurança imediata no carregamento do navegador
+        const token = localStorage.getItem('token_saude');
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('boas-vindas').textContent = `Operador: ${localStorage.getItem('usuario_nome') || 'Usuário'}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            recarregarDadosPainel();
+        });
+
+        // Função Central que varre as APIs paralelas do Back-end
+        async function recarregarDadosPainel() {
+            const ano = document.getElementById('filtro-ano').value;
+            
+            await atualizarRodapeSaude(ano);
+            await carregarCardsDasFontes(ano);
+        }
+
+        // 🧠 Agregação Matemática e Cor de Alerta do Rodapé
+        async function atualizarRodapeSaude(ano) {
+            try {
+                const res = await fetch(`/api/dashboard/saude?ano=${ano}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await res.json();
+
+                if (!res.ok) throw new Error(dados.error);
+
+                // Injeta valores com formatação de moeda brasileira em tamanho massivo
+                document.getElementById('rodape-orcamento').textContent = formatarMoeda(dados.saldoOrcamentario);
+                document.getElementById('rodape-caixa').textContent = formatarMoeda(dados.saldoFinanceiro);
+                document.getElementById('diagnostico-mensagem').textContent = dados.mensagem;
+
+                // Troca a cor física do rodapé sem recarregar
+                const rodape = document.getElementById('rodape-status');
+                rodape.className = `rodape-saude status-${dados.statusSaude.toLowerCase()}`;
+
+            } catch (err) {
+                console.error('Erro ao atualizar rodapé:', err);
+            }
+        }
+
+        // 🎴 Geração Automática dos Cards Cadastrados pelo Usuário
+        async function carregarCardsDasFontes(ano) {
+            const grid = document.getElementById('grid-fontes');
+            try {
+                // Passo 1: Busca todas as fontes livres criadas pelo usuário
+                const resFontes = await fetch('/api/fontes/listar', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const fontes = await resFontes.json();
+
+                if (fontes.length === 0) {
+                    grid.innerHTML = `<div style="font-size: 1.6rem; font-weight: 700; color: #ef4444; grid-column: 1/-1;">Nenhuma Fonte cadastrada no sistema. Vá até "Nova Fonte / Ficha" para começar.</div>`;
+                    return;
+                }
+
+                grid.innerHTML = ''; // Limpa o carregando
+
+                // Passo 2: Para cada fonte livre, busca a sua respectiva saúde orçamentária e financeira
+                for (let fonte of fontes) {
+                    const resSaude = await fetch(`/api/dashboard/saude?ano=${ano}&fonte=${fonte.numero}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const saude = await resSaude.json();
+
+                    // Cria o elemento visual gigante na tela dinamicamente
+                    const card = document.createElement('div');
+                    card.className = `card-fonte saude-${saude.statusSaude.toLowerCase()}`;
+                    card.innerHTML = `
+                        <div class="card-fonte-cabecalho">
+                            <h3>FONTE ${fonte.numero}</h3>
+                            <div style="font-size: 1.4rem; font-weight: 700; color: #475569; margin-top: 5px;">${fonte.nome}</div>
+                            <span class="badge-tipo">${fonte.tipo}</span>
+                        </div>
+                        <div class="valores-container">
+                            <div class="bloco-valor">
+                                <span class="rotulo">Saldo Orçamentário Atual</span>
+                                <span class="numero-gigante-orcamento">${formatarMoeda(saude.saldoOrcamentario)}</span>
+                            </div>
+                            <div class="bloco-valor">
+                                <span class="rotulo">Dinheiro Real em Caixa</span>
+                                <span class="numero-gigante-caixa">${formatarMoeda(saude.saldoFinanceiro)}</span>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+
+            } catch (err) {
+                grid.innerHTML = `<div style="color:red; font-size:1.5rem;">Erro de conexão com o servidor.</div>`;
+            }
+        }
+
+        // Utilitários de velocidade
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

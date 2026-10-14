@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Restrito - Gestão Orçamentária da Saúde</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <style>
+        /* Estilos específicos e ultra-leves exclusivos para centralizar o portal de login */
+        .container-login {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100vw;
+            background-color: #f0f4f8;
+        }
+        .portal-card {
+            background: #ffffff;
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+            border-top: 8px solid #007bff;
+        }
+        .topo-login {
+            margin-bottom: 40px;
+        }
+        .logo-login {
+            height: 110px;
+            width: auto;
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+        .subtitulo-login {
+            font-size: 1.2rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        .mensagem-erro {
+            background-color: #fef2f2;
+            color: #ef4444;
+            border: 2px solid #fca5a5;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: none; /* Oculto por padrão */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-login">
+        <div class="portal-card">
+            
+            <!-- Topo com o Logo de Alta Visibilidade -->
+            <div class="topo-login">
+                <img src="imagens/logo-saude.png" alt="Logo Secretaria da Saúde" class="logo-login" onerror="this.src='https://placehold.co'">
+                <h1 style="font-size: 2.2rem; font-weight: 900; color: #004085;">SISTEMA GESTÃO</h1>
+                <div class="subtitulo-login">Planejamento & Finanças</div>
+            </div>
+
+            <!-- Alerta de Erro Inteligente -->
+            <div id="erro-autenticacao" class="mensagem-erro"></div>
+
+            <!-- Formulário com Campos Expandidos -->
+            <form id="form-login" onsubmit="executarLogin(event)">
+                <div class="grupo-campo" style="text-align: left;">
+                    <label for="usuario">Usuário / Operador</label>
+                    <input type="text" id="usuario" class="input-grande" placeholder="Digite seu usuário..." required autocomplete="username">
+                </div>
+
+                <div class="grupo-campo" style="text-align: left; margin-bottom: 35px;">
+                    <label for="senha">Senha de Segurança</label>
+                    <input type="password" id="senha" class="input-grande" placeholder="Digite sua senha..." required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-principal-gigante">
+                    🔒 ENTRAR NO SISTEMA
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Vanilla de Alta Velocidade para Processar a Entrada -->
+    <script>
+        // Limpa qualquer sessão anterior ao entrar na tela de login
+        localStorage.clear();
+
+        async function executarLogin(event) {
+            event.preventDefault(); // Impede o recarregamento lento da página
+            
+            const login = document.getElementById('usuario').value;
+            const senha = document.getElementById('senha').value;
+            const painelErro = document.getElementById('erro-autenticacao');
+            
+            painelErro.style.display = 'none';
+
+            try {
+                const resposta = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, senha })
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw new Error(resultado.error || 'Falha ao conectar ao servidor.');
+                }
+
+                // Armazenamento em memória ultra-rápido local do navegador
+                localStorage.setItem('token_saude', resultado.token);
+                localStorage.setItem('usuario_nome', resultado.usuario.nome);
+                localStorage.setItem('usuario_nivel', resultado.usuario.nivel);
+
+                // Direciona instantaneamente para o painel principal de saúde
+                window.location.href = 'index.html';
+
+            } catch (erro) {
+                painelErro.textContent = erro.message;
+                painelErro.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

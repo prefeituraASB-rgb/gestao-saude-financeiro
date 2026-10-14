@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Fontes - Gestão Orçamentária da Saúde</title>
+    <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+    <!-- 🔝 TOPO FIXO (LOGO E SELETOR TEMPORAL) -->
+    <header class="topo-sistema">
+        <div class="logo-container">
+            <img src="imagens/logo-saude.png" alt="Logo Secretaria da Saúde" class="logo-saude" onerror="this.src='https://placehold.co'">
+            <h1 class="titulo-topo">Secretaria Municipal de Saúde</h1>
+        </div>
+        <div class="seletor-ano-container">
+            <label class="label-ano" for="filtro-ano">Exercício:</label>
+            <select id="filtro-ano" class="select-ano-grande" onchange="atualizarRodapeSaude()">
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="corpo-sistema">
+        <!-- 🧱 MENU LATERAL ESQUERDO FIXO -->
+        <nav class="menu-lateral">
+            <button class="btn-menu" onclick="window.location.href='index.html'">🏠 Painel Geral</button>
+            <button class="btn-menu ativo" onclick="window.location.href='fontes.html'">➕ Nova Fonte / Ficha</button>
+            <button class="btn-menu" onclick="window.location.href='lancamentos.html'">💸 Lançar Valores</button>
+            <button class="btn-menu" onclick="window.location.href='relatorios.html'">📊 Relatórios</button>
+            <button class="btn-menu" style="margin-top: auto; color: #ef4444;" onclick="logout()">🚪 Sair</button>
+        </nav>
+
+        <!-- 🏢 ÁREA DE CONTEÚDO CENTRAL GIGANTE -->
+        <main class="conteudo-central">
+            <h2 class="titulo-pagina">Ficha de Cadastro Livre de Fontes</h2>
+
+            <!-- Alertas de feedback -->
+            <div id="mensagem-sucesso" style="display:none; background-color:#d1e7dd; color:#0f5132; padding:20px; border-radius:12px; font-size:1.3rem; font-weight:700; margin-bottom:25px; border:2px solid #badbcc;"></div>
+            <div id="mensagem-erro" style="display:none; background-color:#f8d7da; color:#842029; padding:20px; border-radius:12px; font-size:1.3rem; font-weight:700; margin-bottom:25px; border:2px solid #f5c2c7;"></div>
+
+            <div class="ficha-formulario">
+                <form id="form-fonte" onsubmit="salvarNovaFonte(event)">
+                    
+                    <div class="grupo-campo">
+                        <label for="numero-fonte">Número Oficial da Fonte</label>
+                        <input type="number" id="numero-fonte" class="input-grande" placeholder="Ex: 1, 5, 120, 300" required>
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label for="nome-fonte">Nome do Recurso ou Destinação</label>
+                        <input type="text" id="nome-fonte" class="input-grande" placeholder="Ex: Custeio Atenção Básica, Emenda Ventiladores Pulmonares" required>
+                    </div>
+
+                    <div class="grupo-campo">
+                        <label style="margin-bottom: 5px;">Classificação do Tipo de Recurso</label>
+                        <!-- Botões Gangorra Gigantes de Seleção Direta -->
+                        <div class="container-gangorra">
+                            <button type="button" class="btn-gangorra" onclick="selecionarTipoRecurso(this, 'Próprio')">Próprio</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarTipoRecurso(this, 'Estadual')">Estadual</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarTipoRecurso(this, 'Federal')">Federal</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarTipoRecurso(this, 'Emenda Parlamentar')">Emenda Parlamentar</button>
+                            <button type="button" class="btn-gangorra" onclick="selecionarTipoRecurso(this, 'Emenda Impositiva de Vereador')">Emenda Vereador</button>
+                        </div>
+                        <input type="hidden" id="tipo-recurso-selecionado" required>
+                    </div>
+
+                    <button type="submit" class="btn-principal-gigante" style="margin-top: 20px; background-color: #0d9488;">
+                        💾 SALVAR FICHA DA FONTE
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- 🟢🟡🔴 RODAPÉ DE DIAGNÓSTICO FIXO -->
+    <footer id="rodape-status" class="rodape-saude status-verde">
+        <div id="diagnostico-mensagem" class="texto-diagnostico">Carregando dados da saúde financeira...</div>
+        <div class="valores-rodape">
+            <div class="item-valor-rodape">📑 Orçamento Total: <span id="rodape-orcamento" class="numero">R\$ 0,00</span></div>
+            <div class="item-valor-rodape">🏦 Caixa Real: <span id="rodape-caixa" class="numero">R\$ 0,00</span></div>
+        </div>
+    </footer>
+
+    <script>
+        const token = localStorage.getItem('token_saude');
+        if (!token) window.location.href = 'login.html';
+
+        // Nível de acesso: Apenas administradores salvam novas fichas de origem
+        const nivelUsuario = localStorage.getItem('usuario_nivel');
+        if (nivelUsuario !== 'Admin') {
+            document.querySelector('.ficha-formulario').innerHTML = `<div style="font-size:1.6rem; font-weight:700; color:#ef4444;">⚠️ AVISO: Seu perfil (${nivelUsuario}) possui apenas permissão de visualização ou lançamento operacional. Cadastro de dotações restrito à Gestão Superior.</div>`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarRodapeSaude();
+        });
+
+        // Lógica do clique nos botões gangorra gigantes
+        function selecionarTipoRecurso(botao, valor) {
+            // Desmarca todos os botões do grupo
+            document.querySelectorAll('.btn-gangorra').forEach(btn => btn.classList.remove('selecionado'));
+            // Marca o botão clicado
+            botao.classList.add('selecionado');
+            // Injeta o valor no input oculto de envio
+            document.getElementById('tipo-recurso-selecionado').value = valor;
+        }
+
+        // Submissão assíncrona ultra-rápida do formulário
+        async function salvarNovaFonte(event) {
+            event.preventDefault();
+            const numero = document.getElementById('numero-fonte').value;
+            const nome = document.getElementById('nome-fonte').value;
+            const tipo = document.getElementById('tipo-recurso-selecionado').value;
+            
+            const msgSucesso = document.getElementById('mensagem-sucesso');
+            const msgErro = document.getElementById('mensagem-erro');
+            
+            msgSucesso.style.display = 'none';
+            msgErro.style.display = 'none';
+
+            if (!tipo) {
+                msgErro.textContent = "Por favor, selecione a classificação do tipo de recurso clicando em um dos botões grandes.";
+                msgErro.style.display = 'block';
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/fontes/cadastrar', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ numero, nome, tipo })
+                });
+                
+                const dados = await res.json();
+
+                if (!res.ok) throw new Error(dados.error);
+
+                msgSucesso.textContent = `Sucesso: Fonte nº ${numero} integrada ao painel operacional de acompanhamento!`;
+                msgSucesso.style.display = 'block';
+                document.getElementById('form-fonte').reset();
+                document.querySelectorAll('.btn-gangorra').forEach(btn => btn.classList.remove('selecionado'));
+                document.getElementById('tipo-recurso-selecionado').value = '';
+                
+                atualizarRodapeSaude(); // Atualiza o rodapé após novo cadastro
+
+            } catch (err) {
+                msgErro.textContent = err.message;
+                msgErro.style.display = 'block';
+            }
+        }
+
+        // Sincronização em tempo real do rodapé fixo
+        async function atualizarRodapeSaude() {
+            const ano = document.getElementById('filtro-ano').value;
+            try {
+                const res = await fetch(`/api/dashboard/saude?ano=${ano}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const dados = await res.json();
+                
+                document.getElementById('rodape-orcamento').textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dados.saldoOrcamentario);
+                document.getElementById('rodape-caixa').textContent = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(dados.saldoFinanceiro);
+                document.getElementById('diagnostico-mensagem').textContent = dados.mensagem;
+                document.getElementById('rodape-status').className = `rodape-saude status-${dados.statusSaude.toLowerCase()}`;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

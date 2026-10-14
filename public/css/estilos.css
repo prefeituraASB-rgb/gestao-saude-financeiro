@@ -1,104 +1,90 @@
 /* ==========================================================================
-   🎨 ESTILO CENTRAL - SISTEMA DE GESTÃO DA SAÚDE (ALTA VISIBILIDADE)
+   ✨ HIGH-END DASHBOARD UI - DESIGN MODERNO & LETRAS GIGANTES
    ========================================================================== */
 
-/* Configurações Globais Otimizadas */
+@import url('https://googleapis.com');
+
+/* Reset Total para Performance e Fluidez */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
 body {
-    background-color: #f4f6f9;
-    color: #2c3e50;
-    overflow-x: hidden;
+    background-color: #f8fafc; /* Fundo acinzentado moderno */
+    color: #0f172a;
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
-/* ==========================================================================
-   🔝 TOPO FIXO (HEADER)
-   ========================================================================== */
+/* 🔝 TOPO MODERNO (HEADER) */
 .topo-sistema {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 90px;
-    background-color: #ffffff;
-    border-bottom: 3px solid #007bff;
+    height: 85px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px); /* Efeito vidro fosco atual */
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 30px;
+    padding: 0 40px;
     z-index: 1000;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
 }
 
 .logo-saude {
-    height: 65px;
+    height: 50px;
     width: auto;
-    object-fit: contain;
 }
 
 .titulo-topo {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 800;
-    color: #004085;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.seletor-ano-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.label-ano {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #495057;
+    color: #0f172a;
+    letter-spacing: -0.5px;
 }
 
 .select-ano-grande {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    padding: 8px 20px;
-    border-radius: 8px;
-    border: 2px solid #ced4da;
-    color: #007bff;
-    background-color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    color: #3b82f6;
+    background-color: #ffffff;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
 }
 
-/* ==========================================================================
-   🧱 CORPO DO LAYOUT (MENU LATERAL + CONTEÚDO)
-   ========================================================================== */
+/* 🧱 LAYOUT GERAL (MENU + CONTEÚDO) */
 .corpo-sistema {
     display: flex;
-    margin-top: 90px; /* Descola do topo fixo */
-    height: calc(100vh - 180px); /* Desconta o topo e o rodapé */
+    margin-top: 85px;
+    height: calc(100vh - 175px); /* Desconta o topo e o rodapé */
     width: 100%;
 }
 
-/* Menu Lateral Esquerdo */
+/* Menu Lateral Elegante Flat */
 .menu-lateral {
-    width: 280px;
-    background-color: #1e293b;
-    padding: 30px 15px;
+    width: 290px;
+    background-color: #0f172a; /* Slate Dark moderno */
+    padding: 40px 20px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     height: 100%;
     position: fixed;
     left: 0;
@@ -107,240 +93,256 @@ body {
 .btn-menu {
     display: flex;
     align-items: center;
-    gap: 15px;
     width: 100%;
-    padding: 20px;
-    font-size: 1.3rem;
+    padding: 18px 20px;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #94a3b8;
     background: transparent;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     cursor: pointer;
     text-align: left;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-menu:hover, .btn-menu.ativo {
     color: #ffffff;
-    background-color: #0f172a;
-    border-left: 6px solid #38bdf8;
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Área de Conteúdo Central (Painel Gigante) */
+.btn-menu.ativo {
+    background-color: #3b82f6; /* Destaque azul moderno */
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+}
+
+/* Área de Conteúdo Expandida */
 .conteudo-central {
-    margin-left: 280px; /* Empurra para o lado do menu */
-    width: calc(100% - 280px);
-    padding: 40px;
+    margin-left: 290px;
+    width: calc(100% - 290px);
+    padding: 50px;
     overflow-y: auto;
-    background-color: #f8fafc;
 }
 
-/* ==========================================================================
-   🎴 COMPONENTES VISUAIS GIGANTES (CARDS, BOTÕES E TEXTOS)
-   ========================================================================== */
-
-/* Títulos de Páginas */
 .titulo-pagina {
-    font-size: 2.5rem;
+    font-size: 2.4rem;
     font-weight: 800;
-    margin-bottom: 30px;
+    letter-spacing: -1px;
     color: #0f172a;
+    margin-bottom: 35px;
 }
 
-/* Grid de Cards do Dashboard */
+/* 🎴 CARDS DASHBOARD DINÂMICOS */
 .grid-dashboard {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+    gap: 35px;
+}
+
+.card-fonte {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+    border: 1px solid #e2e8f0;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     gap: 30px;
 }
 
-/* Card de Fonte Individual */
-.card-fonte {
-    background: #ffffff;
-    border-radius: 20px;
-    padding: 35px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-    border-top: 10px solid #cbd5e1;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
+/* Indicadores de saúde discretos na borda esquerda */
+.card-fonte::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 100%;
+    background-color: #cbd5e1;
 }
 
-.card-fonte.saude-verde { border-top-color: #10b981; }
-.card-fonte.saude-amarelo { border-top-color: #f59e0b; }
-.card-fonte.saude-vermelho { border-top-color: #ef4444; }
+.card-fonte.saude-verde::before { background-color: #10b981; }
+.card-fonte.saude-amarelo::before { background-color: #f59e0b; }
+.card-fonte.saude-vermelho::before { background-color: #ef4444; }
 
 .card-fonte-cabecalho h3 {
-    font-size: 1.8rem;
+    font-size: 1.4rem;
     font-weight: 800;
-    color: #1e293b;
+    color: #64748b;
+    text-transform: uppercase;
 }
 
 .badge-tipo {
     display: inline-block;
     padding: 6px 14px;
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    border-radius: 8px;
-    background-color: #e2e8f0;
-    margin-top: 8px;
+    border-radius: 10px;
+    background-color: #f1f5f9;
+    color: #475569;
+    margin-top: 10px;
 }
 
-/* Números Massivos */
+/* 🔢 TIPOGRAFIA FLUIDA E MASSIVA (NÚMEROS GIGANTES) */
 .valores-container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
-.bloco-valor {
-    display: flex;
-    flex-direction: column;
-}
-
-.bloco-valor .rotulo {
-    font-size: 1.1rem;
+.bloke-valor .rotulo {
+    font-size: 0.95rem;
     font-weight: 700;
-    color: #64748b;
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
+/* clamp faz o tamanho crescer de forma inteligente dependendo do monitor */
 .numero-gigante-orcamento {
-    font-size: 3.2rem;
-    font-weight: 900;
-    color: #3b82f6;
+    font-size: clamp(2.5rem, 4vw, 3.8rem);
+    font-weight: 800;
+    color: #2563eb;
+    letter-spacing: -1px;
 }
 
 .numero-gigante-caixa {
-    font-size: 3.2rem;
-    font-weight: 900;
-    color: #0d9488;
+    font-size: clamp(2.5rem, 4vw, 3.8rem);
+    font-weight: 800;
+    color: #059669;
+    letter-spacing: -1px;
 }
 
-/* Formulários e Fichas Expandidas */
+/* 📥 FORMULÁRIOS E COMPONENTES TIPO GANGORRA MODERNOS */
 .ficha-formulario {
     background: #ffffff;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-    max-width: 900px;
-}
-
-.grupo-campo {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 25px;
+    padding: 45px;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.01);
+    max-width: 850px;
 }
 
 .grupo-campo label {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #1e293b;
+    color: #334155;
+    margin-bottom: 12px;
+    display: block;
 }
 
 .input-grande, .select-grande {
-    font-size: 1.5rem;
-    padding: 15px 20px;
-    border-radius: 12px;
-    border: 2px solid #cbd5e1;
+    font-size: 1.3rem;
+    padding: 16px 22px;
+    border-radius: 16px;
+    border: 1px solid #cbd5e1;
+    background-color: #f8fafc;
     width: 100%;
-    color: #334155;
+    color: #0f172a;
+    transition: all 0.2s;
 }
 
 .input-grande:focus, .select-grande:focus {
     border-color: #3b82f6;
+    background-color: #ffffff;
     outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-/* Botões Robustos de Clique */
-.btn-principal-gigante {
-    background-color: #007bff;
-    color: #ffffff;
-    font-size: 1.6rem;
-    font-weight: 800;
-    padding: 20px 40px;
-    border: none;
-    border-radius: 14px;
-    cursor: pointer;
-    width: 100%;
-    transition: background 0.2s;
-}
-
-.btn-principal-gigante:hover {
-    background-color: #0056b3;
-}
-
-/* Botões Estilo Gangorra / Opções de Clique Rápido */
+/* Botões Gangorra Estilo Flat Moderno */
 .container-gangorra {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 15px;
+    display: flex;
+    gap: 16px;
+    width: 100%;
 }
 
 .btn-gangorra {
+    flex: 1;
     padding: 18px;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    background-color: #f1f5f9;
-    border: 2px solid #cbd5e1;
-    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
     cursor: pointer;
-    color: #475569;
+    color: #64748b;
+    transition: all 0.2s;
+}
+
+.btn-gangorra:hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
 }
 
 .btn-gangorra.selecionado {
-    background-color: #e0f2fe;
-    border-color: #0284c7;
-    color: #0369a1;
+    background-color: #eff6ff;
+    border-color: #3b82f6;
+    color: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 }
 
-/* ==========================================================================
-   🟢🟡🔴 RODAPÉ DE DIAGNÓSTICO FIXO (SAÚDE FINANCEIRA)
-   ========================================================================== */
+/* Botão de Ação Robusto Principal */
+.btn-principal-gigante {
+    background-color: #0f172a;
+    color: #ffffff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 20px 30px;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.btn-principal-gigante:hover {
+    background-color: #1e293b;
+    transform: translateY(-2px);
+}
+
+/* 🟢🟡🔴 RODAPÉ DE SAÚDE FIXO INTERATIVO */
 .rodape-saude {
     position: fixed;
     bottom: 0;
-    left: 280px; /* Começa logo após o menu lateral */
-    width: calc(100% - 280px);
+    left: 290px;
+    width: calc(100% - 290px);
     height: 90px;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 40px;
+    padding: 0 50px;
     z-index: 1000;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 -5px 15px rgba(0,0,0,0.08);
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Classes Dinâmicas de Saúde do Rodapé */
 .rodape-saude.status-verde { background-color: #10b981; }
-.rodape-saude.status-amarelo { background-color: #f59e0b; color: #1e293b; }
+.rodape-saude.status-amarelo { background-color: #f59e0b; color: #0f172a; }
 .rodape-saude.status-vermelho { background-color: #ef4444; }
 
 .texto-diagnostico {
-    font-size: 1.4rem;
-    font-weight: 800;
-    letter-spacing: 0.3px;
+    font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .valores-rodape {
     display: flex;
-    gap: 40px;
+    gap: 50px;
 }
 
 .item-valor-rodape {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.2rem;
+    font-weight: 600;
+    opacity: 0.9;
 }
 
 .item-valor-rodape span.numero {
-    font-size: 1.8rem;
-    font-weight: 900;
+    font-size: 1.6rem;
+    font-weight: 800;
+    opacity: 1;
+    margin-left: 8px;
 }

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalação do Sistema - Gestão Orçamentária da Saúde</title>
+    <link rel="stylesheet" href="css/estilo.css">
+    <style>
+        /* Estilos específicos e ultra-leves exclusivos para centralizar o portal de instalação */
+        .container-setup {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100vw;
+            background-color: #f0fdf4; /* Tom verde leve para sinalizar o início da saúde */
+        }
+        .portal-card {
+            background: #ffffff;
+            padding: 50px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            border-top: 8px solid #10b981; /* Detalhe verde de sucesso */
+        }
+        .topo-setup {
+            margin-bottom: 35px;
+        }
+        .logo-setup {
+            height: 110px;
+            width: auto;
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+        .subtitulo-setup {
+            font-size: 1.1rem;
+            color: #047857;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        .mensagem-erro {
+            background-color: #fef2f2;
+            color: #ef4444;
+            border: 2px solid #fca5a5;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container-setup">
+        <div class="portal-card">
+            
+            <!-- Topo com a Identidade da Saúde -->
+            <div class="topo-setup">
+                <img src="imagens/logo-saude.png" alt="Logo Secretaria da Saúde" class="logo-setup" onerror="this.src='https://placehold.co'">
+                <h1 style="font-size: 2.2rem; font-weight: 900; color: #065f46;">CONFIGURAÇÃO INICIAL</h1>
+                <div class="subtitulo-setup">Cadastre o Administrador Mestre do Sistema</div>
+            </div>
+
+            <!-- Alerta de Erro Visual -->
+            <div id="erro-instalacao" class="mensagem-erro"></div>
+
+            <!-- Formulário com Campos Gigantes -->
+            <form id="form-setup" onsubmit="executarInstalacao(event)">
+                
+                <div class="grupo-campo" style="text-align: left;">
+                    <label for="nome">Nome Completo do Gestor</label>
+                    <input type="text" id="nome" class="input-grande" placeholder="Ex: Dr. Carlos Silva" required>
+                </div>
+
+                <div class="grupo-campo" style="text-align: left;">
+                    <label for="usuario">Defina o Usuário de Acesso (Login)</label>
+                    <input type="text" id="usuario" class="input-grande" placeholder="Ex: gestorsaude, admin" required autocomplete="username">
+                </div>
+
+                <div class="grupo-campo" style="text-align: left; margin-bottom: 35px;">
+                    <label for="senha">Defina a Senha de Segurança</label>
+                    <input type="password" id="senha" class="input-grande" placeholder="Mínimo 6 caracteres..." required autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn-principal-gigante" style="background-color: #10b981;">
+                    ⚙️ CONFIGURAR E ATIVAR SISTEMA
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- JavaScript Vanilla de Alta Performance para Integração com a Rota Limpa -->
+    <script>
+        async function ejecutarInstalacao(event) {
+            event.preventDefault(); // Impede recarregamento lento da página
+            
+            const nome = document.getElementById('nome').value;
+            const login = document.getElementById('usuario').value;
+            const senha = document.getElementById('senha').value;
+            const painelErro = document.getElementById('erro-instalacao');
+            
+            painelErro.style.display = 'none';
+
+            if(senha.length < 6) {
+                painelErro.textContent = "A senha de segurança precisa ter no mínimo 6 caracteres para proteção do orçamento.";
+                painelErro.style.display = 'block';
+                return;
+            }
+
+            try {
+                // Dispara a nova rota limpa post que configuramos
+                const resposta = await fetch('/api/auth/instalar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, login, senha })
+                });
+
+                const resultado = await resposta.json();
+
+                if (!resposta.ok) {
+                    throw new Error(resultado.error || 'Falha ao processar a instalação no servidor.');
+                }
+
+                // Exibe um alerta de sucesso gigante e limpo para o usuário
+                alert("🎉 Sistema ativado com sucesso! Você será redirecionado para a tela de acesso.");
+                
+                // Redireciona o navegador de volta para a raiz limpa do site
+                window.location.href = '/';
+
+            } catch (erro) {
+                painelErro.textContent = erro.message;
+                painelErro.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
